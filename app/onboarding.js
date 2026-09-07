@@ -28,13 +28,22 @@ export default function Onboarding() {
   const setCourt = useApp((s) => s.setCourt);
   const [step, setStep] = useState(0);
   const [agree, setAgree] = useState(false);
-  const [picked, setPicked] = useState('love');
+  const currentCourt = useApp((s) => s.me.courtId);
+  const [picked, setPicked] = useState(currentCourt || 'love');
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg }}
       contentContainerStyle={[{ paddingTop: insets.top + 30, paddingBottom: insets.bottom + 30, paddingHorizontal: 20, gap: 20 }, layout.content]}
     >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="이용 안내 닫고 재판소로 돌아가기"
+        onPress={() => router.canGoBack() ? router.back() : router.replace('/')}
+        style={{ minHeight: 44, alignSelf: 'flex-start', justifyContent: 'center' }}
+      >
+        <Text style={[type.small, { color: colors.textMuted }]}>‹ 재판소로 돌아가기</Text>
+      </Pressable>
       {step === 0 ? (
         <>
           <View style={s.hero}>
