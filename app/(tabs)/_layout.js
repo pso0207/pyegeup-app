@@ -60,6 +60,10 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textFaint,
+        // React Navigation은 768px 이상에서 라벨을 아이콘 옆으로 자동 전환한다.
+        // 배지가 있는 재판소·프로필 탭에서는 그 라벨이 배지와 겹치므로,
+        // 모바일과 웹 모두 아이콘 위 / 라벨 아래 구조로 고정한다.
+        tabBarLabelPosition: 'below-icon',
         tabBarStyle: {
           backgroundColor: colors.bgElevated,
           borderTopColor: colors.borderSoft,
@@ -102,7 +106,7 @@ export default function TabsLayout() {
 }
 
 const s = StyleSheet.create({
-  iconWrap: { alignItems: 'center', justifyContent: 'center', paddingTop: 7 },
+  iconWrap: { width: 30, height: 27, alignItems: 'center', justifyContent: 'flex-end', paddingTop: 5 },
   marker: {
     position: 'absolute',
     top: 0,
@@ -113,8 +117,8 @@ const s = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: 3,
-    right: -10,
+    top: 0,
+    right: -6,
     minWidth: 16,
     height: 16,
     paddingHorizontal: 4,
