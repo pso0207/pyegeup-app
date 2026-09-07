@@ -13,6 +13,12 @@ npx expo start        # QR 스캔 → Expo Go
 npx expo start --ios  # iOS 시뮬레이터
 ```
 
+## 웹 배포
+
+- 서비스: https://pso0207.github.io/pyegeup-app/
+- 저장소: https://github.com/pso0207/pyegeup-app
+- `main` 브랜치에 푸시하면 GitHub Actions가 Expo 웹 빌드를 생성해 GitHub Pages에 자동 배포합니다.
+
 ## 화면 구성 (기획서 07)
 
 | 경로 | 화면 | 구현된 기획 항목 |
