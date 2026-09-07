@@ -28,14 +28,16 @@ export default function ResultScreen() {
   const item = cases[id] ?? cases[useApp.getState().lastResult?.caseId] ?? cases.c1;
 
   const judged = useApp((s) => s.judged[item.id]);
-  const addTickets = useApp((s) => s.addTickets);
+  const claimedReward = useApp((s) => s.claimedVerdictRewards[item.id]);
+  const claimVerdictReward = useApp((s) => s.claimVerdictReward);
   const combo = useApp((s) => s.combo);
   const judgedMap = useApp((s) => s.judged);
   const showToast = useApp((s) => s.showToast);
 
   const [phase, setPhase] = useState('counting'); // counting → revealed
-  const [reward] = useState(rollReward);
-  const [rewardTaken, setRewardTaken] = useState(false);
+  const [rolledReward] = useState(rollReward);
+  const reward = claimedReward ?? rolledReward;
+  const rewardTaken = !!claimedReward;
 
   const anim = useRef(new Animated.Value(0.5)).current;
   const [displayRate, setDisplayRate] = useState(0.5);
@@ -266,8 +268,7 @@ export default function ResultScreen() {
             onPress={() => {
               if (rewardTaken) return;
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              addTickets(reward.tickets);
-              setRewardTaken(true);
+              claimVerdictReward(item.id, reward);
             }}
             style={({ pressed }) => [s.reward, { borderColor: reward.color }, pressed && press.surface]}
           >

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform, View, Text, StyleSheet } from 'react-native';
-import { colors, type, radius } from '../../constants/theme';
+import { Platform, View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { colors, type, radius, layout } from '../../constants/theme';
 import { useApp } from '../../store/useApp';
-import { dailyPicks } from '../../data/mock';
+import { cases, dailyPicks } from '../../data/mock';
 
 const TITLES = {
   index: '재판소',
@@ -48,11 +48,18 @@ function TabIcon({ route, focused, color, size, badge, badgeTone }) {
 }
 
 export default function TabsLayout() {
+  const { width } = useWindowDimensions();
   const unread = useApp((st) => st.notifs.filter((n) => n.unread).length);
   // 오늘의 5건만 센다. 전체 judged를 세면 판례집에서 판결한 사건까지 포함돼
   // 홈의 "오늘 N건 남았습니다"와 배지 숫자가 어긋난다.
   const judged = useApp((st) => st.judged);
-  const remaining = Math.max(0, dailyPicks.length - dailyPicks.filter((id) => judged[id]).length);
+  const blocked = useApp((st) => st.blocked);
+  const deleted = useApp((st) => st.deletedCases);
+  const eligible = dailyPicks.filter((id) => cases[id] && !blocked[cases[id].author] && !deleted[id]);
+  const remaining = Math.max(0, eligible.length - eligible.filter((id) => judged[id]).length);
+  // 데스크톱에서 5개 탭을 화면 전체(예: 2,048px)에 벌리면 각 항목의 관계가
+  // 끊겨 보이고 배지·라벨 위치도 파악하기 어렵다. 본문 폭과 같은 560px 안에 모은다.
+  const webNavInset = Platform.OS === 'web' ? Math.max(0, (width - layout.maxWidth) / 2) : 0;
 
   return (
     <Tabs
@@ -68,10 +75,11 @@ export default function TabsLayout() {
           backgroundColor: colors.bgElevated,
           borderTopColor: colors.borderSoft,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 68,
+          height: Platform.OS === 'ios' ? 88 : Platform.OS === 'web' ? 72 : 68,
           paddingTop: 8,
+          paddingHorizontal: webNavInset,
         },
-        // 항목에 maxWidth를 주면 넓은 화면에서 탭이 왼쪽으로 몰린다. 폭 전체에 고르게 편다.
+        // 실제 탭 항목은 위 padding 안의 가용 폭을 5등분한다.
         tabBarItemStyle: { flex: 1 },
         // 라벨을 직접 그려 글자 배율 상한을 건다. 시스템 글자 크기를 최대로 올리면
         // 고정 높이 탭바 안에서 라벨이 잘렸다.
@@ -106,7 +114,7 @@ export default function TabsLayout() {
 }
 
 const s = StyleSheet.create({
-  iconWrap: { width: 30, height: 27, alignItems: 'center', justifyContent: 'flex-end', paddingTop: 5 },
+  iconWrap: { width: 32, height: 28, alignItems: 'center', justifyContent: 'flex-end', paddingTop: 5 },
   marker: {
     position: 'absolute',
     top: 0,
@@ -117,8 +125,8 @@ const s = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: 0,
-    right: -6,
+    top: -2,
+    right: -7,
     minWidth: 16,
     height: 16,
     paddingHorizontal: 4,

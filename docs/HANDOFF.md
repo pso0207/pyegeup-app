@@ -1,12 +1,13 @@
 # 인수인계
 
 > 작업을 이어받는다면 이 파일부터 읽으세요.
-> 마지막 작업일: 2026-09-06
+> 마지막 작업일: 2026-09-07
 
 ## 1. 한 줄
 
 `폐급재판_기획서_v1.0.pdf`를 읽고 **프론트엔드(UI)만** React Native + Expo로 만들었습니다.
-**백엔드는 없습니다** — 사용자가 직접 만들 예정입니다. → [BACKEND.md](BACKEND.md)
+**백엔드는 아직 없습니다.** 구현 스택은 Java 21 · Spring Boot 3.5 · MySQL 8.4로 정했고,
+처음부터 따라가는 문서는 [BACKEND-TUTORIAL.md](BACKEND-TUTORIAL.md)입니다.
 
 ## 2. 지금 상태
 
@@ -16,6 +17,9 @@
 - `node scripts/check-design.mjs` 통과 — DESIGN.md ↔ theme.js 동기화 + WCAG AA 대비
 - **iOS · Android · web 번들 전부 통과**
 - 데이터는 전부 목업 (`data/mock.js`)
+- 웹 하단 탭은 넓은 화면에서 본문 폭 안에 모이고, 아이콘 위·라벨 아래 구조로 고정
+- 첫 이용자용 30초 안내와 오늘의 재판 완주 흐름을 홈에 연결
+- 판결 점수·데일리 +15·랜덤 티켓이 실제 저장 상태에 한 번만 반영
 
 - **Android 에뮬레이터(Pixel_9_API_34) 실행 확인 완료** — 상태바 글자색 포함
 
@@ -68,6 +72,7 @@ npx expo install <패키지> -- --legacy-peer-deps
 | [DESIGN.md](DESIGN.md) | 토큰 · 한글 타이포 · 컴포넌트 규약 · **하지 말 것** |
 | [TESTING.md](TESTING.md) | 번들 · 헤드리스 · 에뮬레이터 검증법 |
 | [BACKEND.md](BACKEND.md) | 엔드포인트 제안 · 서버가 지켜야 할 것 |
+| [BACKEND-TUTORIAL.md](BACKEND-TUTORIAL.md) | Java · Spring Boot · MySQL 서버 생성부터 프론트 연결·테스트·배포 준비 |
 
 ## 6. 구현된 기획서 항목
 
@@ -88,7 +93,7 @@ npx expo install <패키지> -- --legacy-peer-deps
 
 ## 7. 다음에 할 만한 일
 
-- **백엔드** (사용자 담당) → [BACKEND.md](BACKEND.md)
+- **백엔드 구현 시작** → [BACKEND-TUTORIAL.md](BACKEND-TUTORIAL.md)
 - 알림을 서버 이벤트와 연결 — 지금은 `pushNotif`가 로컬에서 쌓습니다
 - 구독한 배심원의 새 판결문 알림 (`followed` 상태는 이미 있음)
 - 사건 상세 진입 트랜지션

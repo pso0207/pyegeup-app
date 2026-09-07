@@ -181,7 +181,7 @@ function VerdictHistory() {
         myGuilty: v.guilty,
         result: `${majorityGuilty ? '유죄' : '무죄'} ${pct}%`,
         correct,
-        points: correct ? 10 : 0,
+        points: v.points ?? (correct ? 10 : 0),
         at: v.at ?? 0,
       };
     })

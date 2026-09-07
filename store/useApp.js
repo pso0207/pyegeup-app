@@ -28,11 +28,14 @@ export const useApp = create(persist((set, get) => ({
   dailyPicks,
   judged: {},
   judgedDay: courtDay(),
+  dailyBonusDay: null,
+  onboardingCompleted: false,
 
   // 마지막 판결 결과 (개표 화면에서 소비)
   lastResult: null,
 
   likedOpinions: {},
+  claimedVerdictRewards: {}, // caseId -> { kind, tickets, color, icon }
 
   // 안전 기능 (스토어 심사 필수 세트)
   reports: { ...reportSeed }, // targetId -> { reason, at, state }
@@ -80,26 +83,76 @@ export const useApp = create(persist((set, get) => ({
   submitVerdict: (caseId, { guilty, sentence, opinion }) => {
     const s = get();
     if (s.tickets < 1) return null;
+    if (s.judged[caseId]) {
+      s.showToast('이미 판결한 사건입니다', 'warn');
+      return s.judged[caseId];
+    }
     const c = cases[caseId];
     const correct = c ? guilty === (c.guiltyRate >= 0.5) : true;
-    const result = { guilty, sentence, opinion, at: Date.now(), correct };
+    const nextCombo = correct ? s.combo + 1 : 0;
+    let basePoints = 0;
+    if (correct && c) {
+      basePoints += 10;
+      if (c.guiltyRate >= 0.45 && c.guiltyRate <= 0.55) basePoints += 20;
+      if (c.guiltyRate >= 0.9 || c.guiltyRate <= 0.1) basePoints += 2;
+      if (guilty && sentence != null && Math.abs(sentence - c.avgSentence) <= 1) basePoints += 5;
+    }
+    const comboMult = nextCombo >= 10 ? 2 : nextCombo >= 5 ? 1.5 : nextCombo >= 3 ? 1.2 : 1;
+    const points = Math.round(basePoints * comboMult);
+    const result = { guilty, sentence, opinion, at: Date.now(), correct, points };
+    const nextJudged = { ...s.judged, [caseId]: result };
+    // 차단하거나 직접 삭제한 사건은 목록에서 사라진다. 보이지 않는 사건 때문에
+    // 완주가 영원히 막히지 않도록, 현재 참여 가능한 데일리만 센다.
+    const eligibleDaily = dailyPicks.filter((id) => {
+      const dailyCase = cases[id];
+      return dailyCase && !s.deletedCases[id] && !s.blocked[dailyCase.author];
+    });
+    const completedDaily = eligibleDaily.length > 0 && eligibleDaily.every((id) => nextJudged[id]);
+    const grantDailyBonus = completedDaily && s.dailyBonusDay !== s.judgedDay;
     set({
       tickets: s.tickets - 1,
-      judged: { ...s.judged, [caseId]: result },
+      judged: nextJudged,
       lastResult: { caseId, ...result },
+      dailyBonusDay: grantDailyBonus ? s.judgedDay : s.dailyBonusDay,
+      me: {
+        ...s.me,
+        jurorScore: s.me.jurorScore + points + (grantDailyBonus ? 15 : 0),
+      },
       // 콤보는 "연속 적중"이다. 무조건 올리면 한 번도 안 끊겨 영구히 ×2.0이 된다.
-      combo: correct ? s.combo + 1 : 0,
+      combo: nextCombo,
       myOpinions: opinion?.trim()
         ? { ...s.myOpinions, [caseId]: opinion.trim() }
         : s.myOpinions,
     });
     get().pushNotif({
       kind: 'result',
-      title: '판결을 접수했습니다',
-      body: `${guilty ? `유죄 ${sentence}단계` : '무죄'} · 마감 후 개표 결과와 지수 정산을 알려드립니다`,
+      title: grantDailyBonus ? '오늘의 재판을 완주했습니다' : '판결을 접수했습니다',
+      body: grantDailyBonus
+        ? '판사 지수 +15 · 내일 오전 9시에 새로운 사건이 열립니다'
+        : `${guilty ? `유죄 ${sentence}단계` : '무죄'} · 마감 후 개표 결과와 지수 정산을 알려드립니다`,
       href: `/case/${caseId}`,
     });
+    if (grantDailyBonus) get().showToast('오늘의 재판 완주 · 판사 지수 +15', 'ok');
     return result;
+  },
+
+  /** 결과 화면을 다시 열어도 같은 사건의 랜덤 보상은 한 번만 받는다. */
+  claimVerdictReward: (caseId, reward) => {
+    const s = get();
+    if (!s.judged[caseId] || s.claimedVerdictRewards[caseId]) return false;
+    set({
+      tickets: s.tickets + reward.tickets,
+      claimedVerdictRewards: { ...s.claimedVerdictRewards, [caseId]: reward },
+    });
+    return true;
+  },
+
+  /** 첫 안내에서 고른 법원은 시즌 이적으로 세지 않는다. */
+  completeOnboarding: (courtId) => {
+    const s = get();
+    if (s.onboardingCompleted) return false;
+    set({ me: { ...s.me, courtId }, onboardingCompleted: true });
+    return true;
   },
 
   writeOpinion: (caseId, body) => {
@@ -333,7 +386,10 @@ export const useApp = create(persist((set, get) => ({
     combo: s.combo,
     judged: s.judged,
     judgedDay: s.judgedDay,
+    dailyBonusDay: s.dailyBonusDay,
+    onboardingCompleted: s.onboardingCompleted,
     likedOpinions: s.likedOpinions,
+    claimedVerdictRewards: s.claimedVerdictRewards,
     likedReplies: s.likedReplies,
     myOpinions: s.myOpinions,
     myReplies: s.myReplies,
@@ -362,6 +418,7 @@ export const useApp = create(persist((set, get) => ({
     const arr = (v, fb) => (Array.isArray(v) ? v : fb);
     const num = (v, fb) => (typeof v === 'number' && Number.isFinite(v) ? v : fb);
     const str = (v, fb) => (typeof v === 'string' ? v : fb);
+    const bool = (v, fb) => (typeof v === 'boolean' ? v : fb);
 
     const clean = {
       me: rec(p.me, current.me),
@@ -369,13 +426,15 @@ export const useApp = create(persist((set, get) => ({
       combo: num(p.combo, current.combo),
       transfersUsed: num(p.transfersUsed, current.transfersUsed),
       judgedDay: str(p.judgedDay, current.judgedDay),
+      dailyBonusDay: p.dailyBonusDay == null ? current.dailyBonusDay : str(p.dailyBonusDay, current.dailyBonusDay),
+      onboardingCompleted: bool(p.onboardingCompleted, current.onboardingCompleted),
       push: rec(p.push, current.push),
       claims: rec(p.claims, current.claims),
       myPosts: arr(p.myPosts, current.myPosts),
     };
     // 레코드형(캐시·플래그 모음)은 전부 같은 규칙
     for (const k of [
-      'judged', 'likedOpinions', 'likedReplies', 'myOpinions', 'myReplies',
+      'judged', 'likedOpinions', 'claimedVerdictRewards', 'likedReplies', 'myOpinions', 'myReplies',
       'reports', 'blocked', 'deletedCases', 'hiddenOpinions', 'peeked',
       'statements', 'followed', 'bookmarks',
     ]) {

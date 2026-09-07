@@ -1,6 +1,7 @@
 # 폐급재판 — 프론트엔드 (React Native / Expo)
 
 > 문서는 [`docs/`](docs/)에 있습니다. 작업을 이어받는다면 [docs/HANDOFF.md](docs/HANDOFF.md)부터.
+> Java Spring Boot + MySQL 서버를 처음 만드는 과정은 [백엔드 입문 튜토리얼](docs/BACKEND-TUTORIAL.md)에 있습니다.
 
 `폐급재판_기획서_v1.0.pdf` 기준으로 만든 **UI 전용** 앱입니다. 서버·DB·인증·결제는 붙어 있지 않고,
 모든 데이터는 `data/mock.js`의 목업과 `store/useApp.js`의 로컬 상태로 동작합니다.
@@ -23,7 +24,7 @@ npx expo start --ios  # iOS 시뮬레이터
 
 | 경로 | 화면 | 구현된 기획 항목 |
 |---|---|---|
-| `app/(tabs)/index.js` | 홈 · 재판소 | 데일리 5건 진행바(●●●○○), 콤보 게이지, 내 사건 실시간 배너, 화제의 재판, 푸시 타임라인, 투고 CTA |
+| `app/(tabs)/index.js` | 홈 · 재판소 | 오늘의 재판 진행·완주 보상, 다음 판결 CTA, 오늘/토론/종결 목록, 첫 이용 안내, 사연 투고 |
 | `app/case/[id].js` | 사건 상세 · 판결 | 4칸 템플릿 열람, 3단계 판결 플로우(유죄·무죄 → 형량 → 판결문), 형량 단계별 햅틱, 판결문 탭(추천순/유죄 측/무죄 측), 투표 전 판결문 잠금 |
 | `app/case/result.js` | 개표 | 3초 게이지 역전 연출, 니어미스 표시, 판사 지수 정산 내역, 랜덤 보상(88/10/2%), 공유 카드 |
 | `app/case/appeal.js` | 항소 | 티켓 50 소모, 소명문 300자, 재심 규칙 |
@@ -36,7 +37,7 @@ npx expo start --ios  # iOS 시뮬레이터
 | `app/case/statement.js` | 최후진술 | 확정 후 48시간 내 1회, 300자, 배심원 전원 알림 |
 | `app/blocked.js` | 차단 목록 | 차단 해제 |
 | `app/reports.js` | 신고 내역 | 접수 상태 확인 |
-| `app/onboarding.js` | 온보딩 | 앱 설명 3단계, EULA 강제 동의, 법원 선택, 가입 티켓 30 |
+| `app/onboarding.js` | 온보딩 | 30초 참여 방법, EULA 동의, 첫 소속 법원 선택, 재방문 안내 |
 | `app/tickets.js` | 티켓 | 획득 경로 / 소모표, 리워드 광고 |
 | `app/notifications.js` | 알림함 | 내 사건 / 커뮤니티 / 운영 필터, 읽음 처리, 안읽음 배지 |
 | `app/u/[nick].js` | 배심원 공개 프로필 | 계급·적중률·전문 법원·대표 판결문·훈장, 구독 / 차단 / 신고 |
@@ -52,9 +53,8 @@ npx expo start --ios  # iOS 시뮬레이터
 | 구독 | 프로필에서 구독 → 판례집 `구독 배심원` 코너 + 프로필 `구독` 탭 + 판결문 카드의 `구독` 표식 |
 | 반박(1단계 대댓글) | `components/OpinionCard.js` — 스레드가 깊어지면 익명 커뮤니티는 싸움만 길어져 1단계로 끊었다 |
 | 알림함 | `app/notifications.js` + `components/NotifBell.js` (홈·프로필 헤더, 탭바 배지) |
-| 활동 피드 | 홈 `지금 법정에서`, 법원 피드 상단 — 커뮤니티가 돌아가고 있다는 신호 |
+| 활동 피드 | 법원 피드 상단 — 같은 법원 사람들이 활동 중이라는 신호 |
 | 스크랩 | 사건 카드/상세의 책갈피 → 판례집 `내 스크랩` 코너 |
-| 속보 티커 | 홈 상단, 5초마다 크로스페이드 |
 | 말머리 · 사건번호 | `constants/domain.js` — `COURTS[].short`, `caseNoOf()` |
 | 확정 도장 | `components/Stamp.js` — 사건 상세 표제부 · 판례집 목록 · 개표 확정 |
 

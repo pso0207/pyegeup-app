@@ -45,3 +45,43 @@
 
 Expo 웹 export, 디자인 토큰/대비 검사, git diff 공백 검사 통과.
 브라우저 연결이 불가능해 실제 렌더링·클릭·모바일 너비 검증은 미완료.
+
+## 2차 UX 점검 · 2026-09-07
+
+### 추가로 확인한 근거
+
+- [Apple Human Interface Guidelines — Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars):
+  탭은 최상위 이동에 쓰고 아이콘과 짧은 라벨을 함께 제공하며, 넓은 화면에서는 사이드바 같은 적응형 구조도 고려한다.
+- [Material Design — Understanding navigation](https://m2.material.io/design/navigation/understanding-navigation.html):
+  모바일 하단 내비게이션은 3~5개 최상위 목적지에 적합하다.
+- [Nielsen Norman Group — Onboarding Tutorials vs. Contextual Help](https://www.nngroup.com/articles/onboarding-tutorials/):
+  시작하자마자 긴 튜토리얼을 강제하기보다 필요한 맥락에서 도움말을 보여주고 다시 찾을 수 있게 한다.
+- [Nielsen Norman Group — Progressive Disclosure](https://www.nngroup.com/articles/progressive-disclosure/):
+  첫 화면에는 자주 쓰는 핵심 행동만 남기고 상세 기능은 요청할 때 펼친다.
+- [Duolingo — Animating the Streak](https://blog.duolingo.com/streak-milestone-design-animation/):
+  일일 행동과 달성 시점을 이해시키고, 의미 있는 이정표에서만 성취를 축하한다.
+- [Stack Overflow — Badges](https://stackoverflow.com/help/badges):
+  보상 이름과 획득 조건을 사용자의 실제 기여 행동에 직접 연결한다.
+- [Reddit — Building the Feed for the Reddit iOS App](https://redditinc.com/news/building-the-feed-for-the-reddit-ios-app):
+  피드는 재사용 가능한 행과 서버 원본 데이터를 중심으로 단순하게 유지한다.
+- [토스테크 — 마케팅 문구 클릭률을 올리는 6가지 원칙](https://toss.tech/article/Marketing_Writing):
+  한 영역에서 장점을 전부 나열하기보다 지금 눌러야 하는 구체적인 이유 하나를 먼저 보여준다.
+
+### 이번에 반영한 것
+
+- 웹 하단 탭을 2,048px 전체에 벌리지 않고 본문과 같은 560px 폭에 모았다.
+- 탭 아이콘과 라벨은 모든 폭에서 위·아래로 고정하고, 배지는 아이콘 우상단에 분리했다.
+- 홈 첫 화면에 `오늘 N건 남음 → 완주 시 판사 지수 +15 → 첫/다음 판결`을 한 덩어리로 연결했다.
+- 온보딩을 여러 개의 설명 카드에서 한 장의 순서 목록으로 줄이고 문구를 대화체로 바꿨다.
+- 첫 이용 전에는 홈에서 30초 안내를 보여주고, 완료 후에는 하단 `이용 안내` 링크만 남긴다.
+- 이용 안내에서 처음 고른 법원은 시즌 이적 횟수로 세지 않는다.
+- 데일리 5건을 끝내면 화면 문구만 바뀌는 것이 아니라 실제 판사 지수 +15가 한 번 반영된다.
+- 중복 탭으로 같은 사건을 두 번 판결해 티켓이 반복 차감되는 동작을 막았다.
+- 차단·삭제로 보이지 않는 사건은 데일리 완주 조건에서 제외했다.
+
+### 배경 판단
+
+다섯 탭 화면의 최상위 배경은 모두 `colors.bg`(`#F4F2EC`)로 통일되어 있다.
+법원 화면만 흰색으로 지정된 코드는 없다. 화면 안의 정보판과 목록만 흰색 `surface`를 사용한다.
+따라서 **미색 바닥 + 흰 서류**의 층위는 유지한다. 전부 흰색이면 목록 경계가 사라지고,
+전부 미색이면 눌러 읽는 정보 단위가 구분되지 않는다. 탭바는 앱의 고정 조작부이므로 흰색을 유지한다.

@@ -10,9 +10,9 @@ import { Button, Card } from '../components/ui';
 
 /** 앱이 무엇인지 세 문장으로 — 약관을 읽기 전에 먼저 납득시킨다. */
 const HOW = [
-  { icon: 'reader-outline', title: '사연이 올라옵니다', text: '네 칸(상황 · 내 행동 · 상대 반응 · 쟁점)으로 정리된 익명 사연이 매일 5건 배정됩니다.' },
-  { icon: 'hammer-outline', title: '유죄인지 정합니다', text: '유죄면 형량 5단계까지 고릅니다. 남의 의견은 내가 투표한 뒤에야 열립니다.' },
-  { icon: 'trending-up-outline', title: '다수와 맞히면 승급합니다', text: '적중하면 판사 지수가 오르고, 틀려도 깎이지 않습니다. 계급은 방청객에서 대법관까지.' },
+  { icon: 'reader-outline', title: '사연을 읽어요', text: '상황 · 행동 · 상대 반응만 읽으면 쟁점이 한 문장으로 정리돼요.' },
+  { icon: 'hammer-outline', title: '내 판단을 남겨요', text: '유죄 또는 무죄를 고르고, 유죄라면 형량까지 정해요.' },
+  { icon: 'trophy-outline', title: '마감 뒤 결과를 봐요', text: '다수의견과 맞으면 판사 지수가 올라요. 틀려도 점수는 깎이지 않아요.' },
 ];
 
 const RULES = [
@@ -25,9 +25,10 @@ const RULES = [
 export default function Onboarding() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const setCourt = useApp((s) => s.setCourt);
+  const completeOnboarding = useApp((s) => s.completeOnboarding);
+  const onboardingCompleted = useApp((s) => s.onboardingCompleted);
   const [step, setStep] = useState(0);
-  const [agree, setAgree] = useState(false);
+  const [agree, setAgree] = useState(onboardingCompleted);
   const currentCourt = useApp((s) => s.me.courtId);
   const [picked, setPicked] = useState(currentCourt || 'love');
 
@@ -44,19 +45,28 @@ export default function Onboarding() {
       >
         <Text style={[type.small, { color: colors.textMuted }]}>‹ 재판소로 돌아가기</Text>
       </Pressable>
+      <View
+        style={s.steps}
+        accessibilityRole="progressbar"
+        accessibilityLabel={onboardingCompleted ? '이용 안내' : `이용 안내 ${step + 1}/2 단계`}
+        accessibilityValue={onboardingCompleted ? undefined : { min: 1, max: 2, now: step + 1 }}
+      >
+        <View style={s.stepOn} />
+        {!onboardingCompleted ? <View style={step === 1 ? s.stepOn : s.stepOff} /> : null}
+      </View>
       {step === 0 ? (
         <>
           <View style={s.hero}>
-            <Ionicons name="hammer" size={38} color={colors.accent} />
-            <Text style={[type.display, { color: colors.text }]}>국민재판소</Text>
+            <Text style={[type.label, { color: colors.accentDim }]}>30초 이용 안내</Text>
+            <Text style={[type.display, { color: colors.text, textAlign: 'center' }]}>남의 일은{`\n`}조금 더 잘 보이니까</Text>
             <Text style={[type.body, { color: colors.textMuted, textAlign: 'center' }]}>
-              내 흑역사를 국민 재판에 넘기고{'\n'}남의 사연을 심판하며 판사로 승급하는 익명 심판 커뮤니티
+              익명 사연을 읽고 유죄·무죄를 고르는 커뮤니티예요. 내 선택은 판결 전까지 남에게 보이지 않아요.
             </Text>
           </View>
 
-          <View style={{ gap: 10 }}>
+          <View style={s.howList}>
             {HOW.map((h, i) => (
-              <View key={h.title} style={s.howRow}>
+              <View key={h.title} style={[s.howRow, i > 0 && s.howDivider]}>
                 <View style={s.howNum}>
                   <Text style={[type.tiny, { color: colors.accent, fontSize: 11 }]}>{i + 1}</Text>
                 </View>
@@ -81,20 +91,27 @@ export default function Onboarding() {
             ))}
           </Card>
 
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: agree }}
-            accessibilityLabel="이용 약관에 동의하며 만 17세 이상입니다"
-            onPress={() => setAgree(!agree)}
-            style={s.agree}
-          >
-            <Ionicons name={agree ? 'checkbox' : 'square-outline'} size={20} color={agree ? colors.accent : colors.textFaint} />
-            <Text style={[type.small, { color: colors.text, flex: 1 }]}>
-              위 내용에 동의하며, 만 17세 이상입니다
-            </Text>
-          </Pressable>
+          {!onboardingCompleted ? (
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: agree }}
+              accessibilityLabel="이용 약관에 동의하며 만 17세 이상입니다"
+              onPress={() => setAgree(!agree)}
+              style={s.agree}
+            >
+              <Ionicons name={agree ? 'checkbox' : 'square-outline'} size={20} color={agree ? colors.accent : colors.textFaint} />
+              <Text style={[type.small, { color: colors.text, flex: 1 }]}>
+                위 내용에 동의하며, 만 17세 이상입니다
+              </Text>
+            </Pressable>
+          ) : null}
 
-          <Button title="동의하고 시작하기" disabled={!agree} onPress={() => setStep(1)} full />
+          <Button
+            title={onboardingCompleted ? '확인했어요' : '동의하고 계속하기'}
+            disabled={!agree}
+            onPress={() => onboardingCompleted ? router.replace('/') : setStep(1)}
+            full
+          />
           <Text style={[type.tiny, { color: colors.textFaint, textAlign: 'center' }]}>
             국민재판소는 오락 목적의 익명 커뮤니티이며, 판결에 법적 효력은 없습니다
           </Text>
@@ -127,15 +144,15 @@ export default function Onboarding() {
             })}
           </View>
           <Card style={{ gap: 6 }}>
-            <Text style={[type.h3, { color: colors.accent }]}>가입 축하 티켓 30장</Text>
+            <Text style={[type.h3, { color: colors.accent }]}>티켓은 이렇게 써요</Text>
             <Text style={[type.small, { color: colors.textMuted }]}>
-              판결 1회에 티켓 1장이 소모됩니다. 출석 · 광고 · 사연 등록으로 충전할 수 있습니다.
+              판결 1회에 1장이 들고, 출석 · 광고 · 사연 등록으로 다시 채울 수 있어요.
             </Text>
           </Card>
           <Button
             title="입장하기"
             onPress={() => {
-              setCourt(picked);
+              completeOnboarding(picked);
               router.replace('/');
             }}
             full
@@ -150,23 +167,21 @@ const s = StyleSheet.create({
   hero: {
     alignItems: 'center',
     gap: 10,
-    padding: 28,
-    borderRadius: radius.xl,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingVertical: 18,
+    paddingHorizontal: 10,
   },
+  steps: { flexDirection: 'row', gap: 6, alignSelf: 'stretch' },
+  stepOn: { flex: 1, height: 3, borderRadius: 2, backgroundColor: colors.accent },
+  stepOff: { flex: 1, height: 3, borderRadius: 2, backgroundColor: colors.border },
   agree: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  howList: { borderRadius: radius.lg, borderWidth: 1, borderColor: colors.borderSoft, backgroundColor: colors.surface, paddingHorizontal: 14 },
   howRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 11,
-    padding: 14,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    backgroundColor: colors.surface,
+    paddingVertical: 14,
   },
+  howDivider: { borderTopWidth: 1, borderTopColor: colors.borderSoft },
   howNum: {
     width: 22,
     height: 22,

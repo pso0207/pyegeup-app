@@ -184,7 +184,12 @@ export function VerdictBar({ guiltyRate, height = 8, showLabels = true, animated
 /** 데일리 진행 도트 ●●●○○ */
 export function ProgressDots({ total = 5, done = 0 }) {
   return (
-    <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+    <View
+      accessibilityRole="progressbar"
+      accessibilityLabel={`오늘의 재판 ${total}건 중 ${done}건 완료`}
+      accessibilityValue={{ min: 0, max: total, now: Math.min(done, total) }}
+      style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}
+    >
       {Array.from({ length: total }).map((_, i) => (
         <View
           key={i}

@@ -12,6 +12,7 @@
 | [DESIGN.md](DESIGN.md) | UI를 고치기 전에. 토큰 · 한글 타이포 · 컴포넌트 규약 |
 | [TESTING.md](TESTING.md) | 변경 후 검증할 때. 번들 · 헤드리스 · 에뮬레이터 |
 | [BACKEND.md](BACKEND.md) | 서버를 붙일 때. 엔드포인트 제안 · 목업 교체 지점 |
+| **[BACKEND-TUTORIAL.md](BACKEND-TUTORIAL.md)** | Java 21 · Spring Boot 3.5 · MySQL 8.4 서버를 처음부터 만들 때 |
 
 기획 원본은 `~/Downloads/폐급재판/폐급재판_기획서_v1.0.pdf`입니다.
 텍스트로 다시 읽으려면 `pdftotext -layout <경로> out.txt` (pdftotext 설치되어 있음).
