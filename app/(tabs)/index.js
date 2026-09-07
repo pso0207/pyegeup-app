@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useFocusEffect, useScrollToTop } from 'expo-router';
 import { colors, radius, type, layout, press } from '../../constants/theme';
 import { cases, dailyPicks, caseList } from '../../data/mock';
@@ -11,7 +12,6 @@ import NotifBell from '../../components/NotifBell';
 import TicketPill from '../../components/TicketPill';
 import useRefresh from '../../components/useRefresh';
 import { ListSkeleton } from '../../components/Skeleton';
-import { ProgressDots } from '../../components/ui';
 
 const FILTERS = [['today', '오늘의 재판'], ['discussed', '토론 많은'], ['closed', '판결 완료']];
 
@@ -59,7 +59,14 @@ export default function HomeScreen() {
           <NotifBell />
         </View>
 
-        <View style={s.dailyBrief}>
+        <LinearGradient colors={[colors.purpleSoft, colors.surface]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.dailyBrief}>
+          <View style={s.featureHeader}>
+            <View style={s.featureLabel}>
+              <Ionicons name={allDone ? 'checkmark-circle' : 'sparkles-outline'} size={15} color={colors.purple} />
+              <Text style={[type.tiny, { color: colors.purple }]}>{allDone ? '오늘의 재판 완료' : '오늘, 당신의 판단은?'}</Text>
+            </View>
+            <Text style={[type.mono, s.muted]}>{done}/{total}</Text>
+          </View>
           <View style={s.dailyTop}>
             <View style={s.flexText}>
               <Text style={[type.small, s.muted]}>{next ? `${courtById(next.courtId).name} · 오늘의 사건` : '오늘의 재판'}</Text>
@@ -68,24 +75,27 @@ export default function HomeScreen() {
               </Text>
               {next ? <Text numberOfLines={2} style={[type.body, s.muted, { marginTop: 10 }]}>{next.situation}</Text> : null}
             </View>
-            <Text numberOfLines={1} style={[type.mono, { color: colors.text }]}>{done}/{total}</Text>
           </View>
-          <View style={s.dailyBottom}>
-            <View style={[s.flexText, { gap: 8 }]}>
-              <ProgressDots total={total} done={done} />
-              <Text style={[type.tiny, s.muted]}>{allDone ? '오늘의 참여 완료' : '오늘의 재판 완주 시 +15점'}</Text>
-            </View>
             {next ? (
               <Pressable accessibilityRole="button" onPress={() => router.push(`/case/${next.id}`)}
                 style={({ pressed }) => [s.nextButton, pressed && press.cta]}>
-                <Text numberOfLines={1} maxFontSizeMultiplier={1.2} style={[type.small, { color: colors.onAccent }]}>
+                <Text style={[type.bodyStrong, { color: colors.onAccent, flex: 1 }]}>
                   {done ? '다음 사연 읽기' : '읽고 판단하기'}
                 </Text>
-                <Ionicons name="arrow-forward" size={14} color={colors.onAccent} />
+                <View style={s.buttonArrow}><Ionicons name="arrow-forward" size={18} color={colors.onAccent} /></View>
               </Pressable>
             ) : null}
+          <View style={s.progressSection}>
+            <View accessibilityRole="progressbar" accessibilityLabel="오늘의 재판 참여" accessibilityValue={{ min: 0, max: total || 1, now: done }} style={s.progressTrack}>
+              {Array.from({ length: total }, (_, i) => <View key={i} style={[s.progressSegment, i < done && { backgroundColor: colors.innocent }]} />)}
+            </View>
+            <View style={s.progressCaption}>
+              <Ionicons name={allDone ? 'checkmark-circle-outline' : 'ribbon-outline'} size={16} color={allDone ? colors.innocent : colors.ticket} />
+              <Text style={[type.tiny, s.muted, s.flexText]}>{allDone ? '오늘도 한 걸음, 참여를 마쳤어요' : total ? '오늘의 재판을 모두 마치면' : '지금은 참여할 사건이 없어요'}</Text>
+              {total > 0 && !allDone ? <Text style={[type.small, { color: colors.ticket, fontWeight: '700' }]}>+15점</Text> : null}
+            </View>
           </View>
-        </View>
+        </LinearGradient>
 
         {!onboardingCompleted ? <Pressable accessibilityRole="button" accessibilityLabel="참여 방법 보기"
           onPress={() => router.push('/onboarding')} style={({ pressed }) => [s.helpRow, pressed && press.control]}>
@@ -106,7 +116,7 @@ export default function HomeScreen() {
           {FILTERS.map(([key, label]) => (
             <Pressable key={key} accessibilityRole="tab" accessibilityState={{ selected: filter === key }}
               onPress={() => setFilter(key)} style={({ pressed }) => [s.tab, filter === key && s.activeTab, pressed && press.control]}>
-              <Text numberOfLines={1} maxFontSizeMultiplier={1.3} style={[type.small, { color: filter === key ? colors.text : colors.textFaint, fontWeight: filter === key ? '700' : '400' }]}>{label}</Text>
+              <Text numberOfLines={1} maxFontSizeMultiplier={1.3} style={[type.small, { color: filter === key ? colors.purple : colors.textFaint, fontWeight: filter === key ? '700' : '400' }]}>{label}</Text>
             </Pressable>
           ))}
         </View>
@@ -143,7 +153,7 @@ function StoryRow({ item, judged, onPress }) {
     <Pressable accessibilityRole="button" accessibilityLabel={`${item.title}, 의견 ${item.opinionCount}개${judged ? ', 참여 완료' : ''}`}
       onPress={onPress} style={({ pressed }) => [s.story, pressed && press.surface]}>
       <View style={s.storyMeta}>
-        <Text numberOfLines={1} style={[type.tiny, s.muted, s.fixed]}>{courtById(item.courtId).short}</Text>
+        <View style={s.category}><Text numberOfLines={1} style={[type.tiny, { color: colors.purple }]}>{courtById(item.courtId).short}</Text></View>
         <Text numberOfLines={1} style={[type.tiny, s.muted, s.flexText]}>{item.author}</Text>
         {closed ? <Text numberOfLines={1} style={[type.tiny, s.fixed, { color: guilty ? colors.guilty : colors.innocent }]}>{guilty ? '유죄' : '무죄'} 종결</Text>
           : judged ? <Text numberOfLines={1} style={[type.tiny, s.fixed, { color: colors.innocent }]}>참여 완료</Text> : null}
@@ -177,18 +187,25 @@ const s = StyleSheet.create({
   headerCopy: { flex: 1, minWidth: 0, paddingRight: 4 },
   ticket: { minHeight: 44, justifyContent: 'center' },
   notice: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.borderSoft },
-  dailyBrief: { gap: 24, marginTop: 8, padding: 22, borderRadius: 12, borderWidth: 1, borderColor: colors.borderSoft, backgroundColor: colors.surface },
+  dailyBrief: { gap: 20, marginTop: 8, padding: 22, borderRadius: 20, borderWidth: 1, borderColor: colors.borderSoft, backgroundColor: colors.surface },
+  featureHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  featureLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
+  progressSection: { gap: 10, paddingTop: 2 },
+  progressTrack: { flexDirection: 'row', gap: 5, height: 5 },
+  progressSegment: { flex: 1, borderRadius: radius.pill, backgroundColor: colors.surfaceAlt },
+  progressCaption: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  buttonArrow: { width: 30, height: 30, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.purpleSoft },
   helpRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10 },
   dailyTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  dailyBottom: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 16 },
-  nextButton: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, borderRadius: radius.md, backgroundColor: colors.accent },
+  nextButton: { minHeight: 54, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, borderRadius: 12, backgroundColor: colors.purple },
   boardHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, paddingBottom: 12, gap: 8 },
   writeButton: { minHeight: 40, paddingHorizontal: 12, borderRadius: radius.sm, backgroundColor: colors.accent, flexDirection: 'row', alignItems: 'center', gap: 5 },
-  tabs: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.borderSoft },
-  tab: { flex: 1, minWidth: 0, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  activeTab: { borderBottomColor: colors.text },
+  tabs: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, padding: 4, borderRadius: 12, marginBottom: 8 },
+  tab: { flex: 1, minWidth: 0, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 9 },
+  activeTab: { backgroundColor: colors.surface },
   textButton: { minHeight: 44, justifyContent: 'center' },
-  story: { paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: colors.borderSoft },
+  story: { padding: 18, marginBottom: 10, borderRadius: 14, borderWidth: 1, borderColor: colors.borderSoft, backgroundColor: colors.surface },
+  category: { backgroundColor: colors.purpleSoft, paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.md, flexShrink: 0 },
   storyTitle: { fontSize: 18, lineHeight: 27, fontWeight: '600', letterSpacing: -0.4, marginVertical: 9 },
   storyMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, minWidth: 0 },
   footer: { marginTop: 30, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.borderSoft, flexDirection: 'row', gap: 18 },
