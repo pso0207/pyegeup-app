@@ -148,7 +148,7 @@ export function Button({ title, onPress, tone = 'primary', disabled, icon, style
       ]}
     >
       {icon ? <Ionicons name={icon} size={16} color={c.fg} /> : null}
-      <Text style={[type.h3, { color: c.fg }]}>{title}</Text>
+      <Text style={[type.h3, { color: c.fg, flexShrink: 1, textAlign: 'center' }]}>{title}</Text>
     </Pressable>
   );
 }
@@ -276,6 +276,8 @@ const s = StyleSheet.create({
     borderWidth: 1,
   },
   btn: {
+    minHeight: 48,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

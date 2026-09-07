@@ -55,7 +55,6 @@ export default function ResultScreen() {
   const correct = myGuilty === majorityGuilty;
   const isClose = finalRate >= 0.45 && finalRate <= 0.55;
   const isUnanimous = finalRate >= 0.9 || finalRate <= 0.1;
-  const margin = Math.round(Math.abs(finalRate - 0.5) * 2 * item.voteCount);
   // 다수의견 쪽의 득표율 — 유죄율을 그대로 쓰면 무죄 다수일 때 숫자가 뒤집힌다
   const majorityPct = Math.round((majorityGuilty ? finalRate : 1 - finalRate) * 100);
 
@@ -68,23 +67,22 @@ export default function ResultScreen() {
     if (myGuilty && judged?.sentence != null && Math.abs(judged.sentence - item.avgSentence) <= 1) points += 5;
   }
   const comboMult = combo >= 10 ? 2 : combo >= 5 ? 1.5 : combo >= 3 ? 1.2 : 1;
-  const totalPoints = Math.round(points * comboMult);
+  const totalPoints = judged?.points ?? Math.round(points * comboMult);
 
   useEffect(() => {
-    // 게이지 역전 연출 — 실제 투표 순서대로 3초간 재생
+    // 집계 비율로 짧게 이동한다. 실제 투표 이력 재생은 아니다.
     const listener = anim.addListener(({ value }) => setDisplayRate(value));
     Animated.sequence([
-      Animated.timing(anim, { toValue: finalRate > 0.5 ? 0.34 : 0.66, duration: 900, easing: Easing.out(Easing.quad), useNativeDriver: false }),
-      Animated.timing(anim, { toValue: finalRate > 0.5 ? 0.62 : 0.41, duration: 1100, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
-      Animated.timing(anim, { toValue: finalRate, duration: 1000, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
-    ]).start(() => {
+      Animated.timing(anim, { toValue: finalRate, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+    ]).start(({ finished }) => {
+      if (!finished) return;
       Haptics.notificationAsync(
         correct ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning
       );
       setPhase('revealed');
       Animated.timing(lights, { toValue: 1, duration: 560, useNativeDriver: false }).start();
     });
-    return () => anim.removeListener(listener);
+    return () => { anim.stopAnimation(); anim.removeListener(listener); };
   }, []);
 
   const pct = Math.round(displayRate * 100);
@@ -98,8 +96,7 @@ export default function ResultScreen() {
 
   const counting = phase === 'counting';
 
-  // 개표 중에는 화면 전체가 암전된다. 게이지 하나만 남기고 전부 지운다 —
-  // 이 3초가 이 앱에서 가장 극적인 순간이고, 곁가지가 하나라도 있으면 힘이 빠진다.
+  // 짧은 결과 전환은 사용자가 건너뛸 수 있다.
   if (counting) {
     return (
       <View style={[s.blackout, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -139,8 +136,15 @@ export default function ResultScreen() {
           </View>
 
           <Text style={[type.small, { color: dark.textFaint, textAlign: 'center' }]}>
-            개표 중 · {item.voteCount.toLocaleString()}표를 투표 순서대로 재생하고 있습니다
+            {item.voteCount.toLocaleString()}명이 남긴 판단을 확인해보세요
           </Text>
+          <Button title="결과 바로 보기" onPress={() => {
+            anim.stopAnimation();
+            anim.setValue(finalRate);
+            setDisplayRate(finalRate);
+            lights.setValue(1);
+            setPhase('revealed');
+          }} />
         </View>
       </View>
     );
@@ -220,19 +224,19 @@ export default function ResultScreen() {
             ]}
           >
             <Ionicons
-              name={correct ? 'checkmark-circle' : 'close-circle'}
+              name={correct ? 'checkmark-circle' : 'chatbubbles-outline'}
               size={34}
               color={correct ? colors.innocent : colors.guilty}
             />
-            <Text style={[type.h1, { color: colors.text }]}>
-              {correct ? '다수의견 적중' : '소수의견'}
+            <Text style={[type.h1, { color: colors.text, textAlign: 'center' }]}>
+              {correct ? '다른 사람들도 같은 생각이에요' : '다르게 볼 수도 있죠'}
             </Text>
             <Text style={[type.small, { color: colors.textMuted, textAlign: 'center' }]}>
               당신은 {myGuilty ? `유죄 ${judged?.sentence}단계` : '무죄'}. 결과는{' '}
               {majorityGuilty ? '유죄' : '무죄'} {majorityPct}%
-              {!correct ? ` — ${margin.toLocaleString()}표 차이로 빗나갔습니다` : ''}
+              {!correct ? ' · 내 생각도 소중한 한 표예요.' : ''}
             </Text>
-            {isClose ? (
+            {correct && isClose ? (
               <Chip label="초박빙 사건 · +20" color={colors.close} bg={colors.closeSoft} icon="flash" />
             ) : null}
           </View>
@@ -246,7 +250,7 @@ export default function ResultScreen() {
               correct && isUnanimous && { label: '만장일치 사건 적중', v: '+2' },
               correct && myGuilty && Math.abs((judged?.sentence ?? 0) - item.avgSentence) <= 1 && { label: '형량 정밀', v: '+5' },
               comboMult > 1 && { label: `${combo}연속 콤보`, v: `×${comboMult}` },
-              !correct && { label: '오답 — 감점 없음', v: '0' },
+              !correct && { label: '소수의견 · 감점 없음', v: '0' },
             ]
               .filter(Boolean)
               .map((r) => (
@@ -318,7 +322,7 @@ export default function ResultScreen() {
                     이쪽 편에 남은 판결문이 없습니다
                   </Text>
                   <Text style={[type.tiny, { color: colors.textFaint, textAlign: 'center' }]}>
-                    소수의견을 먼저 남기면 상단에 고정됩니다.
+                    사건으로 돌아가 내 생각을 남겨보세요.
                   </Text>
                 </Card>
               )}
@@ -327,7 +331,7 @@ export default function ResultScreen() {
 
           <View style={{ gap: 10 }}>
             <Button
-              title={nextCase ? `다음 사건 (${doneCount}/5)` : '오늘의 5건 완주 · +15'}
+              title={nextCase ? `다음 사연 읽기 · ${doneCount}/${dailyPicks.length} 완료` : '오늘의 참여 완료 · 재판소로'}
               icon={nextCase ? 'arrow-forward' : 'trophy'}
               onPress={() => (nextCase ? router.replace(`/case/${nextCase}`) : router.replace('/'))}
               full

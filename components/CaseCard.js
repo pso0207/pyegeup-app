@@ -3,24 +3,13 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, type, press } from '../constants/theme';
 import { useApp } from '../store/useApp';
-import { courtById, caseNoOf, CASE_STATUS } from '../constants/domain';
+import { courtById, CASE_STATUS } from '../constants/domain';
 import { StampChip } from './Stamp';
 import Countdown from './Countdown';
 
 /**
- * 사건 목록 한 줄.
- *
- * 카드가 아니라 "행"이다. 이전에는 radius 12 / border 1 / padding 15 박스에
- * 제목 + 쟁점 2줄 + 아이콘 메타를 담아, 390px 화면에 사건이 2.5개밖에 안 들어갔다.
- * 디시·클리앙·에타 같은 실제 커뮤니티 게시판은 한 화면에 12~15줄이 뜨고,
- * 그 밀도가 "훑어보는 재미"의 전부다.
- *
- * 그래서 바꾼 것:
- *   - 박스 → 하단 헤어라인 한 줄 (`CaseList`가 흰 서류판을 깔아준다)
- *   - 법원 색 띠 + 색 dot + 번호 뱃지 3중 표식 → 말머리 `[직장]` 하나
- *   - 쟁점 요약 줄 삭제 (제목이 이미 쟁점이다)
- *   - 아이콘 메타(사람·문서·자물쇠) → `1,240표 · 판결문 96` 텍스트
- *   - 확정 사건은 유죄율 + 도장으로 즉시 구분
+ * 제목은 두 줄까지 읽고, 참여 수와 상태는 다음 줄에서 확인하는 목록 행.
+ * 메타 정보는 좁은 화면에서 줄바꿈하며, 읽은 사건도 대비를 유지한다.
  *
  * 북마크 버튼은 행 Pressable "밖에" 형제로 둔다. 안에 넣으면 웹에서
  * <button> 중첩이 되어 콘솔 경고가 뜨고, 중첩 버튼은 스크린리더에서도
@@ -38,7 +27,7 @@ export default function CaseCard({ item, onPress, index, judged, compact, bookma
   const guiltyPct = Math.round(item.guiltyRate * 100);
 
   return (
-    <View style={[s.row, judged && { opacity: 0.55 }]}>
+    <View style={s.row}>
       {/* 좌측 열은 "이 행의 신분"을 적는 자리다.
           데일리 목록에서는 순번(디시의 글번호 열), 판례집에서는 확정 도장. */}
       {index != null ? (
@@ -61,7 +50,7 @@ export default function CaseCard({ item, onPress, index, judged, compact, bookma
       >
         {/* 한 줄로 끊는다. 게시판이 훑어지는 이유는 모든 행의 높이가 같아서다 —
             제목이 두 줄로 넘어가는 순간 눈이 리듬을 잃는다. */}
-        <Text style={[type.listTitle, { color: colors.text }]} numberOfLines={1}>
+        <Text style={[type.listTitle, { color: colors.text, fontSize: 16, lineHeight: 25 }]} numberOfLines={2}>
           <Text style={{ color: isClose && !judged ? colors.close : colors.textMuted }}>
             [{isClose && !judged ? '초박빙' : court.short}]{' '}
           </Text>
@@ -72,20 +61,15 @@ export default function CaseCard({ item, onPress, index, judged, compact, bookma
             목록의 밀도가 통째로 무너진다 — 각 조각에 numberOfLines와
             flexShrink: 0을 함께 걸어야 한다(하나만으로는 RN이 접는다). */}
         <View style={s.meta}>
-          <Text style={[type.docNo, s.fixed, { color: colors.textFaint }]} numberOfLines={1}>
-            {caseNoOf(item)}
-          </Text>
-          <Dot />
           <Text style={[type.tiny, s.fixed, { color: colors.textFaint }]} numberOfLines={1}>
             {item.voteCount.toLocaleString()}표
           </Text>
           {/* 댓글수를 대괄호로 적는 건 한국 게시판의 오래된 관습이다.
               "판결문 96"보다 짧고, 숫자가 바로 눈에 띈다. */}
           <Text style={[type.tiny, s.fixed, { color: colors.textMuted }]} numberOfLines={1}>
-            [{item.opinionCount.toLocaleString()}]
+            의견 {item.opinionCount.toLocaleString()}
           </Text>
 
-          <View style={{ flex: 1, minWidth: 6 }} />
 
           {settled || judged ? (
             <Text style={[type.tiny, s.fixed, { color: guiltyPct >= 50 ? colors.guilty : colors.innocent }]} numberOfLines={1}>
@@ -118,7 +102,6 @@ export default function CaseCard({ item, onPress, index, judged, compact, bookma
   );
 }
 
-const Dot = () => <Text style={[type.tiny, { color: colors.borderSoft }]}>·</Text>;
 
 /**
  * 사건 행을 얹는 흰 서류판. 미색 종이 배경 위에 흰 판을 깔아야
@@ -147,8 +130,8 @@ const s = StyleSheet.create({
   },
   // 디시의 글번호 열과 같은 자리. 데일리 5건에서 몇 번째인지 알려준다.
   gutter: { width: 16, alignItems: 'center' },
-  main: { flex: 1, minWidth: 0, paddingVertical: 9, gap: 3, borderRadius: radius.sm },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  main: { flex: 1, minWidth: 0, paddingVertical: 16, gap: 8, borderRadius: radius.sm },
+  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 10, rowGap: 4 },
   fixed: { flexShrink: 0 },
-  bookmark: { width: 40, height: 40, marginVertical: -6, alignItems: 'center', justifyContent: 'center' },
+  bookmark: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 });
