@@ -155,8 +155,8 @@ export default function CourtScreen() {
       {tab === 'battle' ? (
         <View style={{ gap: 14 }}>
           <Card style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={[type.h3, { color: colors.text }]}>주간 법원 대항전</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <Text numberOfLines={1} style={[type.h3, { color: colors.text, flex: 1, minWidth: 0 }]}>주간 법원 대항전</Text>
               <Chip label="종료까지 2일" color={colors.close} icon="time" small />
             </View>
             <Text style={[type.tiny, { color: colors.textFaint }]}>
@@ -177,11 +177,11 @@ export default function CourtScreen() {
                     <Text style={[type.mono, { color: i === 0 ? colors.accent : colors.textFaint, width: 22 }]}>{i + 1}</Text>
                     <Ionicons name={c.icon} size={15} color={c.color} />
                     <View style={{ flex: 1, gap: 5 }}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={[type.small, { color: colors.text }]}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+                        <Text numberOfLines={1} style={[type.small, { color: colors.text, flex: 1, minWidth: 0 }]}>
                           {c.name} {mine ? '· 내 법원' : ''}
                         </Text>
-                        <Text style={[type.mono, { color: colors.textMuted }]}>{row.avg.toLocaleString()}</Text>
+                        <Text numberOfLines={1} style={[type.mono, { color: colors.textMuted, flexShrink: 0 }]}>{row.avg.toLocaleString()}</Text>
                       </View>
                       <View style={s.miniTrack}>
                         <View style={{ width: `${(row.avg / max) * 100}%`, height: '100%', backgroundColor: c.color, borderRadius: 3 }} />

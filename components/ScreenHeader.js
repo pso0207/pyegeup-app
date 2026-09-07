@@ -10,14 +10,14 @@ import { colors, type, press } from '../constants/theme';
 export default function ScreenHeader({ eyebrow, title, right, action, onAction, actionLabel }) {
   return (
     <View style={s.wrap}>
-      <View style={{ flex: 1, gap: 2 }}>
+      <View style={s.copy}>
         {/* 제목이 먼저다.
             작은 라벨을 제목 위에 얹는 eyebrow는 SaaS 랜딩의 문법이고, 한국어 UI에서는
             읽는 순서까지 뒤집는다. 제목을 세우고 설명을 아래에 붙인다. */}
         <Text style={[type.h1, { color: colors.text }]} numberOfLines={1}>
           {title}
         </Text>
-        {eyebrow ? <Text style={[type.tiny, { color: colors.textFaint }]}>{eyebrow}</Text> : null}
+        {eyebrow ? <Text numberOfLines={1} style={[type.tiny, { color: colors.textFaint }]}>{eyebrow}</Text> : null}
       </View>
       {action ? (
         <Pressable
@@ -38,6 +38,7 @@ export default function ScreenHeader({ eyebrow, title, right, action, onAction, 
 
 const s = StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  copy: { flex: 1, minWidth: 0, gap: 2 },
   action: {
     flexDirection: 'row',
     alignItems: 'center',
