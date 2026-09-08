@@ -1,7 +1,7 @@
 # 폐급재판 — 프론트엔드 (React Native / Expo)
 
 > 문서는 [`docs/`](docs/)에 있습니다. 작업을 이어받는다면 [docs/HANDOFF.md](docs/HANDOFF.md)부터.
-> Java Spring Boot + MySQL은 [회차별 백엔드 학습 코스](docs/learning/README.md)로 시작하고, 전체 코드는 [백엔드 참고서](docs/BACKEND-TUTORIAL.md)에서 찾으세요.
+> Java Spring Boot + MySQL은 [`실습 N 시작해줘` 방식의 프로젝트 코스](docs/learning/PRACTICE-PROJECT.md)로 시작하고, 전체 코드는 [백엔드 참고서](docs/BACKEND-TUTORIAL.md)에서 찾으세요.
 
 `폐급재판_기획서_v1.0.pdf` 기준으로 만든 **UI 전용** 앱입니다. 서버·DB·인증·결제는 붙어 있지 않고,
 모든 데이터는 `data/mock.js`의 목업과 `store/useApp.js`의 로컬 상태로 동작합니다.

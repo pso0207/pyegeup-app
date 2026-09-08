@@ -2,7 +2,7 @@
 
 ## 이번 단계의 결과
 
-Docker의 MySQL이 실행되고, Flyway가 `cases` 테이블을 만들며, Spring Boot가 데이터를 한 건 읽습니다. 상세 명령과 SQL은 [전체 튜토리얼 4~8장](../BACKEND-TUTORIAL.md#4-mysql을-docker로-실행하기)을 사용합니다.
+현재 Mac의 MySQL 8.0.46에 `pyegeup` DB를 만들고, Flyway가 테이블을 생성하며 Spring Boot가 데이터를 한 건 읽습니다. 실제 작업은 [실습 프로젝트 2~4](PRACTICE-PROJECT.md#실습-2--로컬-mysql-연결)를 따라갑니다. Docker 방식은 [전체 튜토리얼 4장](../BACKEND-TUTORIAL.md#4-mysql을-docker로-실행하기)의 대안입니다.
 
 ## 핵심 개념 지도
 
@@ -16,12 +16,13 @@ MySQL       → 실제 데이터를 보존
 
 ## 공부 순서
 
-1. `docker compose up -d`로 MySQL을 실행합니다.
-2. DB 이름, 사용자, 포트를 직접 확인합니다.
-3. Flyway V1 SQL을 한 줄씩 읽습니다.
-4. 테이블을 직접 조회해 컬럼과 인덱스를 확인합니다.
-5. Entity의 필드와 DB 컬럼을 표로 대응시킵니다.
-6. Repository 테스트에서 저장 후 다시 조회합니다.
+1. 시스템 설정의 MySQL 인스턴스가 활성 상태인지 확인합니다.
+2. `/usr/local/mysql/bin/mysql -u root -p`로 접속합니다.
+3. `pyegeup` DB와 로컬 개발 사용자를 만듭니다.
+4. Flyway V1 SQL을 한 줄씩 읽습니다.
+5. 테이블을 직접 조회해 컬럼과 인덱스를 확인합니다.
+6. Entity의 필드와 DB 컬럼을 표로 대응시킵니다.
+7. Repository 테스트에서 저장 후 다시 조회합니다.
 
 ## 반드시 이해할 것
 
@@ -51,4 +52,3 @@ Controller는 아직 만들지 마.
 ## 직접 재작성 과제
 
 사건 상태를 문자열 세 개로 흩어 쓰지 말고 `CaseStatus` enum으로 만듭니다. DB에 어떤 값으로 저장되는지 테스트합니다.
-

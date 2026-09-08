@@ -3,7 +3,7 @@
 ## 기본 원칙
 
 - 사용자는 Java, Spring Boot, MySQL을 배우는 대학 3학년이다. 완성 속도와 학습을 함께 챙긴다.
-- 백엔드 작업 전 `docs/learning/README.md`, `docs/BACKEND.md`, `docs/DOMAIN.md`를 읽는다.
+- 백엔드 작업 전 `docs/learning/README.md`, `docs/learning/PRACTICE-PROJECT.md`, `docs/learning/PROGRESS.md`, `docs/BACKEND.md`, `docs/DOMAIN.md`를 읽는다.
 - 한 번에 서버 전체를 생성하지 않는다. 요청받은 세로 기능(vertical slice) 하나를 끝까지 구현한다.
 - 사용자가 명시하지 않은 도메인 규칙, 보상 수치, 권한 정책을 임의로 바꾸지 않는다.
 - 동작하지 않는 예시 코드나 생략 기호가 든 코드를 실제 구현 파일에 넣지 않는다.
@@ -33,6 +33,9 @@ Controller, Service, Repository, Entity, DTO가 한꺼번에 추가되면 각 �
 - `구현해줘`: 기능과 테스트를 구현하고 리뷰 노트를 작성한다.
 - `리뷰해줘`: 코드를 수정하지 않고 중요도 순으로 문제와 근거를 제시한다.
 - `리팩토링해줘`: 동작을 보존하고 테스트로 확인하면서 구조를 개선한다.
+- `실습 N 시작해줘`: `PRACTICE-PROJECT.md`의 해당 실습을 실제 프로젝트에 구현하고 검증한다. 설명만 하고 끝내지 않는다.
+
+실습 명령을 받으면 필요한 파일 생성과 코드 구현은 에이전트가 담당한다. 사용자가 직접 할 부분은 비밀번호 입력, 실행 결과 관찰, 10~20분짜리 작은 코드 수정과 설명이다. 완료된 실습만 `PROGRESS.md`에 기록한다.
 
 ## 코드 기준
 
@@ -57,4 +60,3 @@ Controller, Service, Repository, Entity, DTO가 한꺼번에 추가되면 각 �
 5. 성능과 스타일
 
 각 지적에는 파일 위치, 실제 위험, 재현 조건, 고치는 방향을 포함한다. 취향 차이는 버그처럼 말하지 않는다.
-

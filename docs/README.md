@@ -12,7 +12,7 @@
 | [DESIGN.md](DESIGN.md) | UI를 고치기 전에. 토큰 · 한글 타이포 · 컴포넌트 규약 |
 | [TESTING.md](TESTING.md) | 변경 후 검증할 때. 번들 · 헤드리스 · 에뮬레이터 |
 | [BACKEND.md](BACKEND.md) | 서버를 붙일 때. 엔드포인트 제안 · 목업 교체 지점 |
-| **[learning/README.md](learning/README.md)** | AI와 기능 하나씩 구현하며 Spring·Java·MySQL을 공부할 때 |
+| **[learning/PRACTICE-PROJECT.md](learning/PRACTICE-PROJECT.md)** | 실제 서버를 12회 실습으로 만들며 Spring·Java·MySQL을 공부할 때 |
 | [BACKEND-TUTORIAL.md](BACKEND-TUTORIAL.md) | Java 21 · Spring Boot · MySQL 전체 코드와 설정을 찾을 때 |
 
 ## 목적별 분류
@@ -24,7 +24,9 @@
 
 ### 백엔드를 배우고 만들 때
 
-- [learning/README.md](learning/README.md): 회차별 학습 순서
+- [learning/PRACTICE-PROJECT.md](learning/PRACTICE-PROJECT.md): `실습 N 시작해줘`로 진행하는 실제 프로젝트
+- [learning/PROGRESS.md](learning/PROGRESS.md): 현재 완료 단계와 다음 명령
+- [learning/README.md](learning/README.md): 학습 문서 전체 안내
 - [learning/AI-COLLABORATION.md](learning/AI-COLLABORATION.md): AI 요청문과 협업 규칙
 - [learning/REVIEW-CHECKLIST.md](learning/REVIEW-CHECKLIST.md): 코드 리뷰 기준
 - [learning/REVIEW-LOG.md](learning/REVIEW-LOG.md): 기능별 학습 기록
